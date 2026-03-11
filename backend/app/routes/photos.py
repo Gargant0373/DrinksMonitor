@@ -171,7 +171,6 @@ def get_vote_pair(session_id: str):
 
     return jsonify({
         "pair": [dict(r) for r in rows],
-        "photo_url": lambda pid: f"/photos/{pid}",
     })
 
 

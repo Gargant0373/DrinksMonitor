@@ -9,6 +9,7 @@ export default defineConfig({
       '/participants': 'http://localhost:5000',
       '/drink': 'http://localhost:5000',
       '/users': 'http://localhost:5000',
+      '/photos': 'http://localhost:5000',
     },
   },
 })
