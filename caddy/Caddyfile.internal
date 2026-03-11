@@ -1,0 +1,26 @@
+# Caddyfile — INTERNAL / BEHIND REVERSE PROXY
+#
+# Use this when another proxy (nginx, Caddy, Traefik…) already owns :80/:443
+# on the host and forwards traffic to this container on an internal port.
+#
+# TLS is intentionally OFF here — the outer proxy handles HTTPS.
+# Caddy just routes /api/* → backend and /* → frontend.
+
+:{$INTERNAL_PORT:8080} {
+    # Disable automatic HTTPS — the outer proxy terminates TLS
+    auto_https off
+
+    # API  →  Gunicorn backend
+    handle /api/* {
+        uri strip_prefix /api
+        reverse_proxy backend:5000 {
+            header_up X-Forwarded-Proto {http.request.header.X-Forwarded-Proto}
+            header_up X-Real-IP        {remote_host}
+        }
+    }
+
+    # Everything else  →  pre-built React SPA
+    handle {
+        reverse_proxy frontend:80
+    }
+}

@@ -1,6 +1,7 @@
 # docker-compose.prod.yml — PRODUCTION
-# Caddy handles HTTPS automatically via Let's Encrypt.
-# Requires DOMAIN set in .env (see .env.example).
+# nginx on the host handles TLS via Certbot (Let's Encrypt).
+# Backend is exposed on host port 5001, frontend on 3003.
+# nginx proxies drinks.gargant.dev → these ports.
 # Usage: ./scripts/start [--build]
 
 services:
@@ -9,6 +10,8 @@ services:
     build:
       context: ./backend
       dockerfile: Dockerfile.prod
+    ports:
+      - "127.0.0.1:5001:5000"   # only loopback — nginx proxies from outside
     volumes:
       - db_data:/app/data
     environment:
@@ -22,26 +25,9 @@ services:
       dockerfile: Dockerfile.prod
       args:
         VITE_API_URL: /api
-    restart: unless-stopped
-
-  caddy:
-    image: caddy:2-alpine
     ports:
-      - "80:80"
-      - "443:443"
-      - "443:443/udp"   # HTTP/3
-    volumes:
-      - ./caddy/Caddyfile.prod:/etc/caddy/Caddyfile:ro
-      - caddy_data:/data           # TLS certs + OCSP staples (persisted)
-      - caddy_config:/config       # Caddy config cache
-    environment:
-      DOMAIN: ${DOMAIN}
-    depends_on:
-      - backend
-      - frontend
+      - "127.0.0.1:3003:80"     # only loopback — nginx proxies from outside
     restart: unless-stopped
 
 volumes:
   db_data:
-  caddy_data:
-  caddy_config:

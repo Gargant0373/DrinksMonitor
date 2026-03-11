@@ -36,38 +36,19 @@ done
 # ── Select compose file ───────────────────────────────────────────────────────
 if $LOCAL; then
   COMPOSE_FILE="$ROOT/docker-compose.yml"
-  ENV_FILE=""
 else
   COMPOSE_FILE="$ROOT/docker-compose.prod.yml"
-  ENV_FILE="$ROOT/.env"
 fi
 
-# ── Helper: run docker compose with the right file & env ─────────────────────
+# ── Helper: run docker compose with the right file ────────────────────────────
 dc() {
-  if [[ -n "$ENV_FILE" && -f "$ENV_FILE" ]]; then
-    docker compose --env-file "$ENV_FILE" -f "$COMPOSE_FILE" "$@"
-  else
-    docker compose -f "$COMPOSE_FILE" "$@"
-  fi
+  docker compose -f "$COMPOSE_FILE" "$@"
 }
 
 # ── Prod pre-flight checks ────────────────────────────────────────────────────
 if ! $LOCAL; then
-  if [[ ! -f "$ENV_FILE" ]]; then
-    echo "ERROR: .env not found. Copy .env.example → .env and set DOMAIN."
-    exit 1
-  fi
-
-  # Verify DOMAIN is set and not the placeholder
-  # shellcheck disable=SC1090
-  source "$ENV_FILE"
-  if [[ -z "${DOMAIN:-}" || "$DOMAIN" == "drinks.example.com" ]]; then
-    echo "ERROR: DOMAIN is not set in .env (current: '${DOMAIN:-}')"
-    exit 1
-  fi
-
   echo "──────────────────────────────────────────"
-  echo " Deploying PROD  →  https://$DOMAIN"
+  echo " Deploying PROD  →  drinks.gargant.dev"
   echo "──────────────────────────────────────────"
 
   if git -C "$ROOT" rev-parse --git-dir &>/dev/null; then
