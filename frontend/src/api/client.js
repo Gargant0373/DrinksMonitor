@@ -45,12 +45,16 @@ export const joinSession = (sessionId, payload) =>
 export const listParticipants = (sessionId) =>
   get(`/sessions/${sessionId}/participants`);
 
-export const uploadAvatar = (participantId, blob) =>
-  fetch(`${BASE}/participants/${participantId}/avatar`, {
-    method: "PUT",
-    headers: { "Content-Type": "image/jpeg" },
-    body: blob,
-  }).then((r) => r.json());
+export const uploadAvatar = (participantId, blob) => {
+  const fd = new FormData();
+  fd.append("file", blob, "avatar.jpg");
+  return fetch(`${BASE}/participants/${participantId}/avatar`, { method: "PUT", body: fd })
+    .then(async (r) => {
+      const data = await r.json().catch(() => ({}));
+      if (!r.ok) throw new Error(data.error ?? `HTTP ${r.status}`);
+      return data;
+    });
+};
 
 export const avatarUrl = (participantId) =>
   `${BASE}/participants/${participantId}/avatar`;
@@ -82,14 +86,25 @@ export const updateParticipant = (participantId, display_name) =>
     method: "PATCH",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ display_name }),
-  }).then((r) => r.json());
+  }).then(async (r) => {
+    const data = await r.json().catch(() => ({}));
+    if (!r.ok) throw new Error(data.error ?? `HTTP ${r.status}`);
+    return data;
+  });
 
 // ── Photos ────────────────────────────────────────────────────────────────────
-export const uploadPhoto = (sessionId, participantId, blob, caption = "") =>
-  fetch(
-    `${BASE}/sessions/${sessionId}/photos?participant_id=${encodeURIComponent(participantId)}&caption=${encodeURIComponent(caption)}`,
-    { method: "POST", headers: { "Content-Type": blob.type || "image/jpeg" }, body: blob }
-  ).then((r) => r.json());
+export const uploadPhoto = (sessionId, participantId, blob, caption = "") => {
+  const fd = new FormData();
+  fd.append("file", blob, "snap.jpg");
+  fd.append("participant_id", participantId);
+  fd.append("caption", caption);
+  return fetch(`${BASE}/sessions/${sessionId}/photos`, { method: "POST", body: fd })
+    .then(async (r) => {
+      const data = await r.json().catch(() => ({}));
+      if (!r.ok) throw new Error(data.error ?? `HTTP ${r.status}`);
+      return data;
+    });
+};
 
 export const listPhotos = (sessionId) =>
   get(`/sessions/${sessionId}/photos`);

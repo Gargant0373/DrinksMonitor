@@ -106,14 +106,19 @@ def get_avatar(participant_id: str):
 
 @participants_bp.put("/participants/<participant_id>/avatar")
 def upload_avatar(participant_id: str):
-    """Accepts raw JPEG bytes in the request body."""
-    if not request.data:
+    """Accepts raw JPEG bytes or multipart FormData with a 'file' field."""
+    if request.files:
+        f = next(iter(request.files.values()))
+        image_data = f.read()
+    elif request.data:
+        image_data = request.data
+    else:
         return jsonify({"error": "no image data"}), 400
 
     db = get_db()
     result = db.execute(
         "UPDATE participants SET avatar_blob = ? WHERE id = ?",
-        (request.data, participant_id),
+        (image_data, participant_id),
     )
     if result.rowcount == 0:
         return jsonify({"error": "participant not found"}), 404

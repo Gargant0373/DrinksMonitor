@@ -38,9 +38,11 @@ def upload_photo(session_id: str):
     if not session:
         return jsonify({"error": "session not found"}), 404
 
-    participant_id = request.args.get("participant_id") or (
-        request.get_json(silent=True) or {}
-    ).get("participant_id")
+    participant_id = (
+        request.args.get("participant_id")
+        or request.form.get("participant_id")
+        or (request.get_json(silent=True) or {}).get("participant_id")
+    )
 
     if not participant_id:
         return jsonify({"error": "participant_id is required"}), 400
@@ -52,7 +54,7 @@ def upload_photo(session_id: str):
     if not participant:
         return jsonify({"error": "participant not found in session"}), 404
 
-    caption = request.args.get("caption", "")
+    caption = request.args.get("caption") or request.form.get("caption", "")
 
     # Accept either multipart file or raw body
     if request.files:
