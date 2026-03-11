@@ -3,6 +3,7 @@ import { useParams } from "react-router-dom";
 import { listDrinks, logDrink, deleteDrink, getStats } from "../api/client";
 import { getParticipantId, getLastLogId, setLastLogId } from "../utils/identity";
 import { usePolling } from "../hooks/usePolling";
+import { useTitle } from "../hooks/useTitle";
 import CrashBanner from "../components/CrashBanner";
 import DrinkButton from "../components/DrinkButton";
 import Leaderboard from "../components/Leaderboard";
@@ -23,6 +24,8 @@ export default function ParticipantDashboard() {
     useCallback(() => getStats(sessionId), [sessionId]),
     3000,
   );
+
+  useTitle(stats?.session?.name ? `🍺 ${stats.session.name}` : "Dashboard");
 
   useEffect(() => {
     listDrinks(sessionId).then(setDrinks);

@@ -2,10 +2,12 @@ import { useState, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { joinSession, uploadAvatar } from "../api/client";
 import { setParticipantId } from "../utils/identity";
+import { useTitle } from "../hooks/useTitle";
 import styles from "./JoinSession.module.css";
 
 export default function JoinSession() {
   const { sessionId } = useParams();
+  useTitle("Join Session");
   const navigate      = useNavigate();
 
   const [step, setStep]             = useState("form"); // form | avatar

@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { listDrinks, addDrink, loadPresets, getSession, endSession, getSessionQRUrl } from "../api/client";
+import { useTitle } from "../hooks/useTitle";
 import styles from "./CreateSession.module.css";
 
 export default function CreateSession() {
@@ -8,6 +9,7 @@ export default function CreateSession() {
   const navigate      = useNavigate();
 
   const [session, setSession]   = useState(null);
+  useTitle(session ? `🎮 ${session.name}` : "Create Session");
   const [drinks, setDrinks]     = useState([]);
   const [form, setForm]         = useState({ name: "", volume_ml: "", alcohol_percent: "", color: "#f59e0b", icon: "🍺" });
   const [loading, setLoading]   = useState(false);

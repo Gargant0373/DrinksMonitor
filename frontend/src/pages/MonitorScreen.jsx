@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useParams } from "react-router-dom";
 import { usePolling } from "../hooks/usePolling";
+import { useTitle } from "../hooks/useTitle";
 import { getStats, getSessionQRUrl } from "../api/client";
 import CrashBanner from "../components/CrashBanner";
 import Leaderboard from "../components/Leaderboard";
@@ -27,6 +28,8 @@ export default function MonitorScreen() {
     useCallback(() => getStats(sessionId), [sessionId]),
     3000,
   );
+
+  useTitle(stats?.session?.name ? `📺 ${stats.session.name}` : "Monitor");
 
   useEffect(() => {
     startRef.current = Date.now();

@@ -1,9 +1,11 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { createSession } from "../api/client";
+import { useTitle } from "../hooks/useTitle";
 import styles from "./Home.module.css";
 
 export default function Home() {
+  useTitle(null); // shows base title: 🍺 DrinksMonitor
   const navigate = useNavigate();
   const [name, setName]       = useState("");
   const [loading, setLoading] = useState(false);
