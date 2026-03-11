@@ -21,7 +21,7 @@ from flask import Blueprint, jsonify
 
 from app.models.database import get_db
 from app.services.bac import alcohol_grams, estimate_bac
-from app.services.scoring import total_points_from_logs, is_crash_active
+from app.services.scoring import total_points_from_logs, total_photo_points, is_crash_active
 
 stats_bp = Blueprint("stats", __name__)
 
@@ -89,6 +89,22 @@ def get_stats(session_id: str):
         logs_by_participant[log_d["participant_id"]].append(log_d)
         drink_type_counts[log_d["drink_name"]] += 1
 
+    # ── Photo + vote counts per participant ──────────────────────────────────
+    photo_rows = db.execute(
+        """SELECT p.participant_id,
+                  COUNT(DISTINCT p.id) AS photo_count,
+                  COUNT(DISTINCT v.id) AS vote_count
+           FROM photos p
+           LEFT JOIN photo_votes v ON v.photo_id = p.id
+           WHERE p.session_id = ?
+           GROUP BY p.participant_id""",
+        (session_id,),
+    ).fetchall()
+    photo_stats: dict[str, dict] = {
+        r["participant_id"]: {"photo_count": r["photo_count"], "vote_count": r["vote_count"]}
+        for r in photo_rows
+    }
+
     # ── Leaderboard + BAC ─────────────────────────────────────────────────────
     leaderboard = []
     bac_ranking  = []
@@ -96,7 +112,10 @@ def get_stats(session_id: str):
     for p in participants:
         pid    = p["id"]
         p_logs = logs_by_participant[pid]  # already oldest-first
-        points = total_points_from_logs(p_logs)
+        drink_pts = total_points_from_logs(p_logs)
+        ps        = photo_stats.get(pid, {"photo_count": 0, "vote_count": 0})
+        photo_pts = total_photo_points(ps["photo_count"], ps["vote_count"])
+        points    = round(drink_pts + photo_pts, 2)
 
         total_alcohol_g = sum(
             alcohol_grams(log["volume_ml"], log["alcohol_percent"]) for log in p_logs
@@ -112,6 +131,7 @@ def get_stats(session_id: str):
             "participant_id": pid,
             "display_name":   p["display_name"],
             "drink_count":    len(p_logs),
+            "photo_count":    ps["photo_count"],
             "points":         points,
             "bac":            bac,
         }
@@ -171,12 +191,37 @@ def get_stats(session_id: str):
         for i in range(start_idx, max_bucket + 1)
     ]
 
+    # ── Recent photos feed (for monitor photo screen) ─────────────────────────
+    photo_feed_rows = db.execute(
+        """SELECT p.id, p.caption, p.taken_at, pt.display_name, pt.id AS participant_id,
+                  (SELECT COUNT(*) FROM photo_votes v WHERE v.photo_id = p.id) AS vote_count
+           FROM photos p
+           JOIN participants pt ON pt.id = p.participant_id
+           WHERE p.session_id = ?
+           ORDER BY p.taken_at DESC
+           LIMIT 20""",
+        (session_id,),
+    ).fetchall()
+    recent_photos = [
+        {
+            "photo_id":       r["id"],
+            "photo_url":      f"/photos/{r['id']}",
+            "caption":        r["caption"],
+            "taken_at":       r["taken_at"],
+            "display_name":   r["display_name"],
+            "participant_id": r["participant_id"],
+            "vote_count":     r["vote_count"],
+        }
+        for r in photo_feed_rows
+    ]
+
     return jsonify({
         "session":           dict(session),
         "leaderboard":       leaderboard,
         "drink_distribution": drink_distribution,
         "bac_ranking":       bac_ranking,
         "recent_logs":       recent_logs,
+        "recent_photos":     recent_photos,
         "drinks_over_time":  drinks_over_time,
         "crash_active":      crash_active,
         "current_crash":     current_crash,

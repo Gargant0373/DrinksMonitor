@@ -24,6 +24,8 @@
 
 .sectionTitle { font-size: 0.9rem; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.5rem; }
 
+.editProfileBtn { align-self: flex-start; font-size: 0.8rem; padding: 0.3rem 0.75rem; }
+
 .drinkGrid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);

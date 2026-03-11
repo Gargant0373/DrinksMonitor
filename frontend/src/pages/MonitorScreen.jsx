@@ -10,9 +10,10 @@ import BACDisplay from "../components/BACDisplay";
 import Avatar from "../components/Avatar";
 import ActivityFeed from "../components/ActivityFeed";
 import DrinksOverTime from "../components/DrinksOverTime";
+import PhotoFeed from "../components/PhotoFeed";
 import styles from "./MonitorScreen.module.css";
 
-const SCREENS = ["leaderboard", "distribution", "bac", "drunkest", "overtime"];
+const SCREENS = ["leaderboard", "distribution", "bac", "drunkest", "overtime", "photos"];
 const ROTATE_INTERVAL_MS = 20_000;
 
 export default function MonitorScreen() {
@@ -77,6 +78,8 @@ export default function MonitorScreen() {
         ) : <Leaderboard entries={stats?.leaderboard ?? []} large />;
       case "overtime":
         return <DrinksOverTime data={stats?.drinks_over_time ?? []} />;
+      case "photos":
+        return <PhotoFeed photos={stats?.recent_photos ?? []} />;
       default:
         return null;
     }
@@ -144,4 +147,5 @@ const LABEL = {
   bac:          "🧪 BAC Ranking",
   drunkest:     "👑 Drunkest Player",
   overtime:     "📈 Drinks Over Time",
+  photos:       "📸 Night Snaps",
 };

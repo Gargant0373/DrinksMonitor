@@ -83,3 +83,31 @@ def is_crash_active(crash_events: list[dict]) -> bool:
         if event["starts_at"] <= now <= event["ends_at"]:
             return True
     return False
+
+
+# ── Photo scoring ─────────────────────────────────────────────────────────────
+PHOTO_BASE      = 0.5   # base points per photo taken
+PHOTO_FATIGUE_K = 0.10  # stronger fatigue for photos than drinks
+VOTE_POINTS     = 0.25  # points awarded per vote received
+
+
+def compute_photo_points(photos_taken: int) -> float:
+    """
+    Points for uploading a snap.
+    Same fatigue mechanic as drinks — diminishing returns.
+    photos_taken = how many photos this participant already uploaded (before this one).
+    """
+    fatigue = 1.0 / (1.0 + photos_taken * PHOTO_FATIGUE_K)
+    return round(PHOTO_BASE * fatigue, 4)
+
+
+def total_photo_points(photo_count: int, vote_count: int) -> float:
+    """
+    Total points from photo activity:
+      - sum of per-photo points (with fatigue)
+      - plus VOTE_POINTS per vote received
+    """
+    snap_pts = sum(
+        compute_photo_points(i) for i in range(photo_count)
+    )
+    return round(snap_pts + vote_count * VOTE_POINTS, 2)

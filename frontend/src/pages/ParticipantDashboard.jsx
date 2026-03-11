@@ -7,6 +7,9 @@ import { useTitle } from "../hooks/useTitle";
 import CrashBanner from "../components/CrashBanner";
 import DrinkButton from "../components/DrinkButton";
 import Leaderboard from "../components/Leaderboard";
+import EditProfile from "../components/EditProfile";
+import SnapButton from "../components/SnapButton";
+import VoteModal from "../components/VoteModal";
 import styles from "./ParticipantDashboard.module.css";
 
 const RATE_LIMIT_SECONDS = 5;
@@ -15,10 +18,12 @@ export default function ParticipantDashboard() {
   const { sessionId }   = useParams();
   const participantId   = getParticipantId(sessionId);
 
-  const [drinks, setDrinks]       = useState([]);
-  const [cooldown, setCooldown]   = useState(0);
-  const [feedback, setFeedback]   = useState(null); // { text, type }
-  const [lastLogId, setLocalLastLogId] = useState(() => getLastLogId(sessionId));
+  const [drinks, setDrinks]             = useState([]);
+  const [cooldown, setCooldown]         = useState(0);
+  const [feedback, setFeedback]         = useState(null); // { text, type }
+  const [lastLogId, setLocalLastLogId]  = useState(() => getLastLogId(sessionId));
+  const [showEditProfile, setShowEditProfile] = useState(false);
+  const [pendingVoteLogId, setPendingVoteLogId] = useState(null);
 
   const { data: stats } = usePolling(
     useCallback(() => getStats(sessionId), [sessionId]),
@@ -50,6 +55,7 @@ export default function ParticipantDashboard() {
         type: res.during_crash ? "crash" : "ok",
       });
       setTimeout(() => setFeedback(null), 2000);
+      setPendingVoteLogId(res.log_id);
     } catch (err) {
       setFeedback({ text: err.message, type: "error" });
       setTimeout(() => setFeedback(null), 2500);
@@ -76,6 +82,24 @@ export default function ParticipantDashboard() {
     <div className={styles.wrapper}>
       <CrashBanner active={stats?.crash_active} />
 
+      {showEditProfile && (
+        <EditProfile
+          participantId={participantId}
+          currentName={myEntry?.display_name ?? ""}
+          onSaved={() => setShowEditProfile(false)}
+          onClose={() => setShowEditProfile(false)}
+        />
+      )}
+
+      {pendingVoteLogId && (
+        <VoteModal
+          sessionId={sessionId}
+          voterId={participantId}
+          drinkLogId={pendingVoteLogId}
+          onDone={() => setPendingVoteLogId(null)}
+        />
+      )}
+
       {/* My stats */}
       <div className={styles.myStats}>
         <div className={styles.stat}>
@@ -91,6 +115,10 @@ export default function ParticipantDashboard() {
           <span className={styles.statLabel}>BAC</span>
         </div>
       </div>
+
+      <button className={`btn btn-ghost ${styles.editProfileBtn}`} onClick={() => setShowEditProfile(true)}>
+        ✏️ Edit Profile
+      </button>
 
       {/* Feedback toast */}
       {feedback && (
@@ -126,6 +154,13 @@ export default function ParticipantDashboard() {
           ↩ Undo last drink
         </button>
       )}
+
+      {/* Snap */}
+      <SnapButton
+        sessionId={sessionId}
+        participantId={participantId}
+        onSnapped={() => setFeedback({ text: "📸 Snap posted!", type: "ok" })}
+      />
 
       {/* Mini leaderboard */}
       <section>

@@ -1,0 +1,97 @@
+.wrap {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.heading {
+  font-size: 1.3rem;
+  font-weight: 700;
+  margin: 0 0 0.75rem;
+  color: var(--color-text, #f1f5f9);
+  flex-shrink: 0;
+}
+
+.empty {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.emptyText {
+  color: var(--muted, #94a3b8);
+  font-size: 1rem;
+  text-align: center;
+}
+
+/* ── Grid layouts ── */
+.grid {
+  flex: 1;
+  display: grid;
+  gap: 8px;
+  min-height: 0;
+}
+
+/* 1-2 photos: single column */
+.grid1, .grid2 { grid-template-columns: 1fr; grid-template-rows: 1fr; }
+.grid2         { grid-template-rows: 1fr 1fr; }
+
+/* 3-4: 2 columns */
+.grid3, .grid4 { grid-template-columns: 1fr 1fr; }
+
+/* 5-6: 3 columns */
+.grid5, .grid6 { grid-template-columns: 1fr 1fr 1fr; }
+
+.card {
+  position: relative;
+  border-radius: 8px;
+  overflow: hidden;
+  background: #111;
+  min-height: 0;
+}
+
+.img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.overlay {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: linear-gradient(transparent, rgba(0 0 0 / 0.75));
+  padding: 0.5rem 0.6rem 0.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+}
+
+.author {
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: #fff;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.caption {
+  font-size: 0.65rem;
+  color: rgba(255 255 255 / 0.8);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.votes {
+  font-size: 0.65rem;
+  color: #fca5a5;
+  font-weight: 600;
+}

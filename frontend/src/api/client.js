@@ -75,3 +75,36 @@ export const createUser = (username, date_of_birth) =>
 
 export const loginUser = (username, date_of_birth) =>
   post("/users/login", { username, date_of_birth });
+
+// ── Participant profile ───────────────────────────────────────────────────────
+export const updateParticipant = (participantId, display_name) =>
+  fetch(`${BASE}/participants/${participantId}`, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ display_name }),
+  }).then((r) => r.json());
+
+// ── Photos ────────────────────────────────────────────────────────────────────
+export const uploadPhoto = (sessionId, participantId, blob, caption = "") =>
+  fetch(
+    `${BASE}/sessions/${sessionId}/photos?participant_id=${encodeURIComponent(participantId)}&caption=${encodeURIComponent(caption)}`,
+    { method: "POST", headers: { "Content-Type": blob.type || "image/jpeg" }, body: blob }
+  ).then((r) => r.json());
+
+export const listPhotos = (sessionId) =>
+  get(`/sessions/${sessionId}/photos`);
+
+export const photoUrl = (photoId) => `${BASE}/photos/${photoId}`;
+
+export const updateCaption = (photoId, caption) =>
+  fetch(`${BASE}/photos/${photoId}`, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ caption }),
+  }).then((r) => r.json());
+
+export const getVotePair = (sessionId, voterId, drinkLogId) =>
+  get(`/sessions/${sessionId}/vote-pair?voter_id=${encodeURIComponent(voterId)}&drink_log_id=${encodeURIComponent(drinkLogId)}`);
+
+export const castVote = (sessionId, voterId, photoId, drinkLogId) =>
+  post("/photos/vote", { session_id: sessionId, voter_id: voterId, photo_id: photoId, drink_log_id: drinkLogId });

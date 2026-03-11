@@ -1,10 +1,11 @@
 """
 Participant routes.
 
-POST /sessions/<id>/join         – join a session
-GET  /sessions/<id>/participants – list participants
-GET  /participants/<id>/avatar   – serve avatar image
-PUT  /participants/<id>/avatar   – upload avatar image
+POST /sessions/<id>/join              – join a session
+GET  /sessions/<id>/participants      – list participants
+GET  /participants/<id>/avatar        – serve avatar image
+PUT  /participants/<id>/avatar        – upload avatar image
+PATCH /participants/<id>              – update display_name and/or avatar
 """
 
 import uuid
@@ -118,3 +119,22 @@ def upload_avatar(participant_id: str):
         return jsonify({"error": "participant not found"}), 404
     db.commit()
     return jsonify({"status": "ok"})
+
+
+@participants_bp.patch("/participants/<participant_id>")
+def update_participant(participant_id: str):
+    """Update display_name.  Avatar is updated separately via PUT /avatar."""
+    data = request.get_json(force=True)
+    display_name = (data.get("display_name") or "").strip()
+    if not display_name:
+        return jsonify({"error": "display_name is required"}), 400
+
+    db = get_db()
+    result = db.execute(
+        "UPDATE participants SET display_name = ? WHERE id = ?",
+        (display_name, participant_id),
+    )
+    if result.rowcount == 0:
+        return jsonify({"error": "participant not found"}), 404
+    db.commit()
+    return jsonify({"status": "ok", "display_name": display_name})

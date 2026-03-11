@@ -63,3 +63,31 @@ CREATE TABLE IF NOT EXISTS crash_events (
     ends_at         TEXT NOT NULL,
     FOREIGN KEY (session_id) REFERENCES sessions(id)
 );
+
+-- Photos (snaps taken during the session)
+CREATE TABLE IF NOT EXISTS photos (
+    id              TEXT PRIMARY KEY,      -- UUID
+    session_id      TEXT NOT NULL,
+    participant_id  TEXT NOT NULL,
+    caption         TEXT NOT NULL DEFAULT '',
+    image_blob      BLOB NOT NULL,
+    mime_type       TEXT NOT NULL DEFAULT 'image/jpeg',
+    taken_at        TEXT NOT NULL DEFAULT (datetime('now')),
+    FOREIGN KEY (session_id)    REFERENCES sessions(id),
+    FOREIGN KEY (participant_id) REFERENCES participants(id)
+);
+
+-- Photo votes (one vote per participant per photo pair log)
+CREATE TABLE IF NOT EXISTS photo_votes (
+    id              TEXT PRIMARY KEY,      -- UUID
+    session_id      TEXT NOT NULL,
+    voter_id        TEXT NOT NULL,         -- participant who voted
+    photo_id        TEXT NOT NULL,         -- photo that was voted FOR
+    drink_log_id    TEXT NOT NULL,         -- the drink log that triggered the vote
+    voted_at        TEXT NOT NULL DEFAULT (datetime('now')),
+    UNIQUE(voter_id, drink_log_id),        -- one vote per drink logged
+    FOREIGN KEY (session_id)    REFERENCES sessions(id),
+    FOREIGN KEY (voter_id)      REFERENCES participants(id),
+    FOREIGN KEY (photo_id)      REFERENCES photos(id),
+    FOREIGN KEY (drink_log_id)  REFERENCES drink_logs(id)
+);
