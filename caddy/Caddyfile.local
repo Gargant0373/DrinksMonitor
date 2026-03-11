@@ -1,0 +1,15 @@
+# Caddyfile — LOCAL
+# Plain HTTP on :80. No TLS. Caddy just reverse-proxies to the two containers.
+
+:80 {
+    # API  →  Flask/Gunicorn
+    handle /api/* {
+        uri strip_prefix /api
+        reverse_proxy backend:5000
+    }
+
+    # Everything else  →  Vite dev server (WebSocket upgrade for HMR)
+    handle {
+        reverse_proxy frontend:5173
+    }
+}

@@ -1,0 +1,22 @@
+.banner {
+  background: var(--primary);
+  color: #000;
+  font-weight: 800;
+  font-size: 1rem;
+  text-align: center;
+  padding: 0.6rem 1rem;
+  border-radius: var(--radius);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  letter-spacing: 0.05em;
+  animation: pulse 1s ease-in-out infinite alternate;
+}
+
+@keyframes pulse {
+  from { opacity: 1; }
+  to   { opacity: 0.7; }
+}
+
+.icon { font-size: 1.2rem; }

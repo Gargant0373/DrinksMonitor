@@ -1,0 +1,98 @@
+#!/usr/bin/env bash
+# =============================================================================
+#  scripts/start
+#
+#  Usage:
+#    ./scripts/start              → pull latest, start/restart PROD
+#    ./scripts/start --local      → start LOCAL stack (no git pull)
+#    ./scripts/start --build      → force image rebuild (works with both)
+#    ./scripts/start --local --build
+#
+#  The script is idempotent: running it again on a live stack performs a
+#  rolling restart (or rebuild + restart when --build is passed).
+# =============================================================================
+
+set -euo pipefail
+
+# ── Resolve project root (one level up from this script) ─────────────────────
+ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+
+# ── Parse flags ───────────────────────────────────────────────────────────────
+LOCAL=false
+BUILD=false
+
+for arg in "$@"; do
+  case "$arg" in
+    --local) LOCAL=true ;;
+    --build) BUILD=true ;;
+    *)
+      echo "Unknown argument: $arg"
+      echo "Usage: $0 [--local] [--build]"
+      exit 1
+      ;;
+  esac
+done
+
+# ── Select compose file ───────────────────────────────────────────────────────
+if $LOCAL; then
+  COMPOSE_FILE="$ROOT/docker-compose.yml"
+  ENV_FILE=""
+else
+  COMPOSE_FILE="$ROOT/docker-compose.prod.yml"
+  ENV_FILE="$ROOT/.env"
+fi
+
+# ── Helper: run docker compose with the right file & env ─────────────────────
+dc() {
+  if [[ -n "$ENV_FILE" && -f "$ENV_FILE" ]]; then
+    docker compose --env-file "$ENV_FILE" -f "$COMPOSE_FILE" "$@"
+  else
+    docker compose -f "$COMPOSE_FILE" "$@"
+  fi
+}
+
+# ── Prod pre-flight checks ────────────────────────────────────────────────────
+if ! $LOCAL; then
+  if [[ ! -f "$ENV_FILE" ]]; then
+    echo "ERROR: .env not found. Copy .env.example → .env and set DOMAIN."
+    exit 1
+  fi
+
+  # Verify DOMAIN is set and not the placeholder
+  # shellcheck disable=SC1090
+  source "$ENV_FILE"
+  if [[ -z "${DOMAIN:-}" || "$DOMAIN" == "drinks.example.com" ]]; then
+    echo "ERROR: DOMAIN is not set in .env (current: '${DOMAIN:-}')"
+    exit 1
+  fi
+
+  echo "──────────────────────────────────────────"
+  echo " Deploying PROD  →  https://$DOMAIN"
+  echo "──────────────────────────────────────────"
+
+  if git -C "$ROOT" rev-parse --git-dir &>/dev/null; then
+    echo "▶ git pull"
+    git -C "$ROOT" pull --ff-only
+  else
+    echo "▶ No git repository found, continuing without fetching."
+  fi
+else
+  echo "──────────────────────────────────────────"
+  echo " Starting LOCAL  →  http://localhost"
+  echo "──────────────────────────────────────────"
+fi
+
+# ── Build (optional) ──────────────────────────────────────────────────────────
+if $BUILD; then
+  echo "▶ Building images…"
+  dc build --pull
+fi
+
+# ── Start / restart ───────────────────────────────────────────────────────────
+echo "▶ Starting services…"
+dc up -d --remove-orphans
+
+# ── Tail logs briefly so the operator can spot startup errors ─────────────────
+echo ""
+echo "▶ Last 20 lines of logs (Ctrl-C to stop following):"
+dc logs --tail=20 --follow

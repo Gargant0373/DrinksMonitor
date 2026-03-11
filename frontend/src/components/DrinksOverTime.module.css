@@ -1,0 +1,71 @@
+.wrap {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  padding: 1rem 0.5rem 0;
+  box-sizing: border-box;
+}
+
+.heading {
+  font-size: 1.3rem;
+  font-weight: 700;
+  margin: 0 0 0.75rem;
+  color: var(--color-text, #f1f5f9);
+  flex-shrink: 0;
+}
+
+.empty {
+  color: var(--color-text-muted, #94a3b8);
+  font-size: 0.9rem;
+  margin: auto;
+  text-align: center;
+}
+
+.chartArea {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.svg {
+  flex: 1;
+  width: 100%;
+  min-height: 0;
+  display: block;
+  overflow: visible;
+}
+
+.counts {
+  display: flex;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.countLabel {
+  flex: 1;
+  text-align: center;
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: var(--color-text, #f1f5f9);
+  min-height: 14px;
+}
+
+.xAxis {
+  display: flex;
+  flex-shrink: 0;
+  margin-top: 2px;
+  padding-bottom: 0.25rem;
+}
+
+.xLabel {
+  flex: 1;
+  text-align: center;
+  font-size: 0.58rem;
+  color: var(--color-text-muted, #94a3b8);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: clip;
+}

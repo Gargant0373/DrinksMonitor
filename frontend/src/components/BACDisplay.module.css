@@ -1,0 +1,33 @@
+.list { list-style: none; display: flex; flex-direction: column; gap: 0.5rem; }
+
+.row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 0.6rem 0.9rem;
+}
+
+.rank {
+  font-weight: 800;
+  font-size: 1.1rem;
+  color: var(--purple);
+  min-width: 1.5rem;
+  text-align: center;
+}
+
+.name { flex: 1; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+.bac {
+  font-weight: 700;
+  font-size: 1rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.bac[data-level="ok"]     { color: var(--success); }
+.bac[data-level="warn"]   { color: var(--primary); }
+.bac[data-level="danger"] { color: var(--danger);  }
+
+.empty { color: var(--muted); text-align: center; padding: 1rem; }

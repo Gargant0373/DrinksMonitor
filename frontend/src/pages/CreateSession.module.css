@@ -1,0 +1,49 @@
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+.header h1 { font-size: 1.4rem; font-weight: 800; }
+
+.qr { width: 200px; height: 200px; border-radius: 8px; margin: 0.75rem auto; display: block; }
+
+.joinUrl { font-size: 0.75rem; color: var(--muted); word-break: break-all; }
+
+.sectionHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.75rem;
+}
+.sectionHeader h2 { font-size: 1.1rem; font-weight: 700; }
+
+.drinkList { list-style: none; display: flex; flex-direction: column; gap: 0.4rem; margin-bottom: 1rem; }
+
+.drinkItem {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.5rem 0.75rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+
+.drinkMeta { margin-left: auto; color: var(--muted); font-size: 0.8rem; }
+
+.empty { color: var(--muted); font-size: 0.85rem; padding: 0.5rem 0; }
+
+.addForm {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+.addForm h3 { font-size: 0.95rem; font-weight: 700; }
+
+.row { display: flex; gap: 0.6rem; }
+.row > div { flex: 1; }
