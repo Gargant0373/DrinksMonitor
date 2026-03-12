@@ -72,12 +72,15 @@ export default function PhotoGallery() {
   const [lightboxIdx, setLightboxIdx] = useState(null);
   const [sort, setSort] = useState("recent"); // recent | votes
 
-  const { data: photos = [] } = usePolling(
+  const { data: rawPhotos = [] } = usePolling(
     useCallback(() => listPhotos(sessionId), [sessionId]),
     5000,
   );
 
   useTitle("📸 Gallery");
+
+  // Normalise: backend may return 'id' or 'photo_id'
+  const photos = (rawPhotos ?? []).map((p) => ({ ...p, photo_id: p.photo_id ?? p.id }));
 
   const sorted = [...photos].sort((a, b) =>
     sort === "votes"

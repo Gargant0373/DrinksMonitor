@@ -34,8 +34,11 @@ function pickRandom(pool, n, excludeIds) {
 }
 
 export default function PhotoFeed({ photos = [] }) {
+  // Normalise: backend may return 'id' or 'photo_id'
+  const normalized = (photos ?? []).map((p) => ({ ...p, photo_id: p.photo_id ?? p.id }));
+
   // Sort by taken_at desc to get newest first
-  const byTime = [...photos].sort((a, b) =>
+  const byTime = [...normalized].sort((a, b) =>
     (b.taken_at ?? "").localeCompare(a.taken_at ?? "")
   );
 
