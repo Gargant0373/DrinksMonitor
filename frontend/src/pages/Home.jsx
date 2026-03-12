@@ -4,17 +4,18 @@ import { createSession } from "../api/client";
 import { useTitle } from "../hooks/useTitle";
 import styles from "./Home.module.css";
 
-function savedSessions() {
+function loadSessions() {
   try { return JSON.parse(localStorage.getItem("dg_sessions") || "[]"); }
   catch { return []; }
 }
 
 export default function Home() {
-  useTitle(null); // shows base title: 🍺 DrinksMonitor
+  useTitle(null);
   const navigate = useNavigate();
-  const [name, setName]       = useState("");
-  const [loading, setLoading] = useState(false);
-  const [error, setError]     = useState("");
+  const [name, setName]         = useState("");
+  const [loading, setLoading]   = useState(false);
+  const [error, setError]       = useState("");
+  const [sessions, setSessions] = useState(loadSessions);
 
   async function handleCreate(e) {
     e.preventDefault();
@@ -23,10 +24,10 @@ export default function Home() {
     setError("");
     try {
       const { session_id } = await createSession(name.trim());
-      // Persist so we can resume after refresh
-      const saved = JSON.parse(localStorage.getItem("dg_sessions") || "[]");
-      saved.unshift({ id: session_id, name: name.trim(), created_at: new Date().toISOString() });
-      localStorage.setItem("dg_sessions", JSON.stringify(saved.slice(0, 10)));
+      const updated = [{ id: session_id, name: name.trim(), created_at: new Date().toISOString() }, ...sessions];
+      const trimmed = updated.slice(0, 10);
+      localStorage.setItem("dg_sessions", JSON.stringify(trimmed));
+      setSessions(trimmed);
       navigate(`/session/${session_id}/setup`);
     } catch (err) {
       setError(err.message);
@@ -56,10 +57,10 @@ export default function Home() {
         </button>
       </form>
 
-      {savedSessions().length > 0 && (
+      {sessions.length > 0 && (
         <div className={styles.recent}>
           <p className={styles.recentLabel}>Recent sessions</p>
-          {savedSessions().map((s) => (
+          {sessions.map((s) => (
             <div key={s.id} className={styles.recentRow}>
               <button
                 className={styles.recentBtn}

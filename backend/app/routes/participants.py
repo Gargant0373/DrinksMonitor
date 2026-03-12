@@ -47,7 +47,7 @@ def join_session(session_id: str):
     if not display_name:
         return jsonify({"error": "display_name is required"}), 400
 
-    # Idempotent: if the participant_id already exists for this session, return it
+    # Idempotent: reconnect by participant_id if provided
     existing_id = data.get("participant_id")
     if existing_id:
         row = db.execute(
@@ -56,6 +56,14 @@ def join_session(session_id: str):
         ).fetchone()
         if row:
             return jsonify({"participant_id": row["id"], "rejoined": True})
+
+    # Fallback: reconnect by display_name (case-insensitive) — handles lost localStorage
+    name_row = db.execute(
+        "SELECT * FROM participants WHERE session_id = ? AND lower(display_name) = lower(?)",
+        (session_id, display_name),
+    ).fetchone()
+    if name_row:
+        return jsonify({"participant_id": name_row["id"], "rejoined": True})
 
     participant_id = str(uuid.uuid4())
     now = _now_iso()

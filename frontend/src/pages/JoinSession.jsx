@@ -1,7 +1,7 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { joinSession, uploadAvatar } from "../api/client";
-import { setParticipantId } from "../utils/identity";
+import { getParticipantId, setParticipantId } from "../utils/identity";
 import { useTitle } from "../hooks/useTitle";
 import styles from "./JoinSession.module.css";
 
@@ -9,6 +9,12 @@ export default function JoinSession() {
   const { sessionId } = useParams();
   useTitle("Join Session");
   const navigate      = useNavigate();
+
+  // If we already have a participant ID for this session, go straight to dashboard
+  useEffect(() => {
+    const existing = getParticipantId(sessionId);
+    if (existing) navigate(`/session/${sessionId}/dashboard`, { replace: true });
+  }, [sessionId]);
 
   const [step, setStep]             = useState("form"); // form | avatar
   const [displayName, setDisplayName] = useState("");
@@ -28,9 +34,10 @@ export default function JoinSession() {
     setError("");
     try {
       const { participant_id } = await joinSession(sessionId, {
-        display_name: displayName.trim(),
-        weight_kg:    weightKg ? parseFloat(weightKg) : null,
+        display_name:   displayName.trim(),
+        weight_kg:      weightKg ? parseFloat(weightKg) : null,
         gender,
+        participant_id: getParticipantId(sessionId) ?? undefined, // send existing id if any
       });
       setParticipantId(sessionId, participant_id);
       setLocalPid(participant_id);
