@@ -14,7 +14,7 @@ import io
 from datetime import datetime, timezone
 
 from flask import Blueprint, request, jsonify, Response
-from PIL import Image
+from PIL import Image, ImageOps
 
 from app.models.database import get_db
 from app.services.scoring import compute_photo_points
@@ -31,10 +31,11 @@ def _now_iso() -> str:
 
 
 def _compress(data: bytes) -> bytes:
-    """Resize to MAX_DIMENSION on longest side and re-encode as JPEG."""
+    """Apply EXIF rotation, resize to MAX_DIMENSION on longest side, re-encode as JPEG."""
     try:
         img = Image.open(io.BytesIO(data))
-        img = img.convert("RGB")  # drop alpha / handle non-JPEG
+        img = ImageOps.exif_transpose(img)  # fix mobile rotation
+        img = img.convert("RGB")            # drop alpha / handle non-JPEG
         img.thumbnail((MAX_DIMENSION, MAX_DIMENSION), Image.LANCZOS)
         out = io.BytesIO()
         img.save(out, format="JPEG", quality=JPEG_QUALITY, optimize=True)
@@ -128,7 +129,17 @@ def list_photos(session_id: str):
            ORDER BY p.taken_at DESC""",
         (session_id,),
     ).fetchall()
-    return jsonify([dict(r) for r in rows])
+    return jsonify([
+        {
+            "photo_id":       r["id"],
+            "participant_id": r["participant_id"],
+            "caption":        r["caption"],
+            "taken_at":       r["taken_at"],
+            "display_name":   r["display_name"],
+            "vote_count":     r["vote_count"],
+        }
+        for r in rows
+    ])
 
 
 # ── Serve image bytes ─────────────────────────────────────────────────────────
