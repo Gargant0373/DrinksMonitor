@@ -4,6 +4,11 @@ import { createSession } from "../api/client";
 import { useTitle } from "../hooks/useTitle";
 import styles from "./Home.module.css";
 
+function savedSessions() {
+  try { return JSON.parse(localStorage.getItem("dg_sessions") || "[]"); }
+  catch { return []; }
+}
+
 export default function Home() {
   useTitle(null); // shows base title: 🍺 DrinksMonitor
   const navigate = useNavigate();
@@ -18,6 +23,10 @@ export default function Home() {
     setError("");
     try {
       const { session_id } = await createSession(name.trim());
+      // Persist so we can resume after refresh
+      const saved = JSON.parse(localStorage.getItem("dg_sessions") || "[]");
+      saved.unshift({ id: session_id, name: name.trim(), created_at: new Date().toISOString() });
+      localStorage.setItem("dg_sessions", JSON.stringify(saved.slice(0, 10)));
       navigate(`/session/${session_id}/setup`);
     } catch (err) {
       setError(err.message);
@@ -46,6 +55,30 @@ export default function Home() {
           {loading ? "Creating…" : "Create Session"}
         </button>
       </form>
+
+      {savedSessions().length > 0 && (
+        <div className={styles.recent}>
+          <p className={styles.recentLabel}>Recent sessions</p>
+          {savedSessions().map((s) => (
+            <div key={s.id} className={styles.recentRow}>
+              <button
+                className={styles.recentBtn}
+                onClick={() => navigate(`/session/${s.id}/setup`)}
+              >
+                <span className={styles.recentName}>{s.name}</span>
+                <span className={styles.recentDate}>{new Date(s.created_at).toLocaleDateString()}</span>
+              </button>
+              <button
+                className={styles.recentMonitor}
+                onClick={() => navigate(`/monitor/${s.id}`)}
+                title="Open monitor"
+              >
+                📺
+              </button>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
