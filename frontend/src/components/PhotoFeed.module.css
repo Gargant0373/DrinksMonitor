@@ -4,16 +4,8 @@
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  padding: 4px;
   box-sizing: border-box;
-}
-
-.heading {
-  font-size: 1.3rem;
-  font-weight: 700;
-  margin: 0 0 0.75rem;
-  color: var(--color-text, #f1f5f9);
-  flex-shrink: 0;
+  padding: 6px;
 }
 
 /* ── Empty state ── */
@@ -24,74 +16,49 @@
   align-items: center;
   justify-content: center;
 }
-
 .emptyText {
   color: var(--muted, #94a3b8);
   font-size: 1rem;
   text-align: center;
 }
 
-/* ── Bento grid ── */
-.bento {
+/* ── Two-column grid ── */
+.grid {
   flex: 1;
   min-height: 0;
   display: grid;
+  grid-template-columns: 3fr 2fr;  /* left bigger */
   gap: 6px;
-  grid-template-columns: 2fr 1fr 1fr;
-  grid-template-rows: 1fr 1fr;
 }
 
-/* 1 photo: full width */
-.bento[data-count="1"] {
-  grid-template-columns: 1fr;
-  grid-template-rows: 1fr;
+/* Each column stacks its two cards */
+.col {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-height: 0;
 }
-
-/* 2 photos: hero left, one right */
-.bento[data-count="2"] {
-  grid-template-columns: 2fr 1fr;
-  grid-template-rows: 1fr;
-}
-
-/* 3 photos: hero left spanning 2 rows, two stacked right */
-.bento[data-count="3"] {
-  grid-template-columns: 2fr 1fr;
-  grid-template-rows: 1fr 1fr;
-}
-
-/* 4: hero left 2 rows, three others in 2 columns */
-.bento[data-count="4"] {
-  grid-template-columns: 2fr 1fr 1fr;
-  grid-template-rows: 1fr 1fr;
-}
-
-/* 5–7: default 3-col 2-row */
 
 /* ── Cards ── */
 .card {
   position: relative;
   border-radius: 10px;
   overflow: hidden;
-  background: #111;
-  transition: box-shadow 0.4s ease;
+  background: #0a0a0a;
+  flex: 1;
+  min-height: 0;
 }
 
-/* Hero always spans full left column across all rows */
-.featured {
-  grid-column: 1;
-  grid-row: 1 / -1;
+/* Large cards (left column) get a subtle new-photo ring */
+.large {
+  box-shadow: 0 0 0 2px rgba(251, 191, 36, 0.55);
 }
 
-/* Spotlight: amber glow pulse on the highlighted card */
-.spotlight {
-  box-shadow: 0 0 0 2px rgba(251, 191, 36, 0.7), 0 4px 28px rgba(251, 191, 36, 0.3);
-  z-index: 1;
-}
-
-/* Orientation: nudge focal point for portraits */
+/* Portrait: anchor top so faces aren't cropped */
+.portrait .img  { object-position: center 15%; }
+/* Landscape: centre */
 .landscape .img { object-position: center center; }
-.portrait  .img { object-position: center 20%; }
-.square    .img { object-position: center center; }
+.square .img    { object-position: center center; }
 
 .img {
   width: 100%;
@@ -106,11 +73,11 @@
   bottom: 0;
   left: 0;
   right: 0;
-  background: linear-gradient(transparent 0%, rgba(0 0 0 / 0.72) 100%);
-  padding: 1.5rem 0.65rem 0.55rem;
+  background: linear-gradient(transparent 0%, rgba(0,0,0,0.72) 100%);
+  padding: 1.4rem 0.6rem 0.5rem;
   display: flex;
   flex-direction: column;
-  gap: 0.15rem;
+  gap: 0.12rem;
 }
 
 .author {
@@ -123,8 +90,8 @@
 }
 
 .caption {
-  font-size: 0.65rem;
-  color: rgba(255 255 255 / 0.82);
+  font-size: 0.62rem;
+  color: rgba(255,255,255,0.82);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -132,7 +99,7 @@
 }
 
 .votes {
-  font-size: 0.65rem;
+  font-size: 0.62rem;
   color: #fda4af;
   font-weight: 700;
 }

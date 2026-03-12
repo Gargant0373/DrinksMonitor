@@ -10,9 +10,11 @@ GET  /sessions/<id>/vote-pair           – get two random photos to vote on
 """
 
 import uuid
+import io
 from datetime import datetime, timezone
 
 from flask import Blueprint, request, jsonify, Response
+from PIL import Image
 
 from app.models.database import get_db
 from app.services.scoring import compute_photo_points
@@ -20,10 +22,25 @@ from app.services.scoring import compute_photo_points
 photos_bp = Blueprint("photos", __name__)
 
 MAX_PHOTO_BYTES = 10 * 1024 * 1024  # 10 MB
+MAX_DIMENSION   = 1200              # px — longest side
+JPEG_QUALITY    = 72
 
 
 def _now_iso() -> str:
     return datetime.now(timezone.utc).isoformat()
+
+
+def _compress(data: bytes) -> bytes:
+    """Resize to MAX_DIMENSION on longest side and re-encode as JPEG."""
+    try:
+        img = Image.open(io.BytesIO(data))
+        img = img.convert("RGB")  # drop alpha / handle non-JPEG
+        img.thumbnail((MAX_DIMENSION, MAX_DIMENSION), Image.LANCZOS)
+        out = io.BytesIO()
+        img.save(out, format="JPEG", quality=JPEG_QUALITY, optimize=True)
+        return out.getvalue()
+    except Exception:
+        return data  # fall back to original if Pillow fails
 
 
 # ── Upload a photo ────────────────────────────────────────────────────────────
@@ -66,6 +83,10 @@ def upload_photo(session_id: str):
         mime_type  = request.content_type or "image/jpeg"
     else:
         return jsonify({"error": "no image data"}), 400
+
+    # Compress + resize before storing
+    image_data = _compress(image_data)
+    mime_type  = "image/jpeg"
 
     # Count existing photos for fatigue calc
     photo_count = db.execute(
