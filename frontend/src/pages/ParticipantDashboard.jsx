@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { listDrinks, logDrink, deleteDrink, getStats } from "../api/client";
 import { getParticipantId, getLastLogId, setLastLogId } from "../utils/identity";
 import { usePolling } from "../hooks/usePolling";
@@ -17,6 +17,7 @@ const RATE_LIMIT_SECONDS = 5;
 export default function ParticipantDashboard() {
   const { sessionId }   = useParams();
   const participantId   = getParticipantId(sessionId);
+  const navigate        = useNavigate();
 
   const [drinks, setDrinks]             = useState([]);
   const [cooldown, setCooldown]         = useState(0);
@@ -161,6 +162,14 @@ export default function ParticipantDashboard() {
         participantId={participantId}
         onSnapped={() => setFeedback({ text: "📸 Snap posted!", type: "ok" })}
       />
+
+      {/* Gallery link */}
+      <button
+        className={`btn btn-ghost btn-full ${styles.galleryBtn}`}
+        onClick={() => navigate(`/session/${sessionId}/gallery`)}
+      >
+        🖼️ View all photos
+      </button>
 
       {/* Mini leaderboard */}
       <section>

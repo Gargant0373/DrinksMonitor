@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { usePolling } from "../hooks/usePolling";
 import { useTitle } from "../hooks/useTitle";
 import { getStats, getSessionQRUrl } from "../api/client";
@@ -18,6 +18,7 @@ const ROTATE_INTERVAL_MS = 20_000;
 
 export default function MonitorScreen() {
   const { sessionId } = useParams();
+  const navigate = useNavigate();
   const [screenIdx, setScreenIdx] = useState(0);
   const [progress, setProgress]   = useState(0);
   // Two slots for crossfade: current (visible) and next (fading in)
@@ -117,6 +118,12 @@ export default function MonitorScreen() {
             alt="Join QR code"
           />
           <p className={styles.qrCode}>{sessionId.slice(0, 8).toUpperCase()}</p>
+          <button
+            className={styles.galleryLink}
+            onClick={() => navigate(`/session/${sessionId}/gallery`)}
+          >
+            🖼️ Gallery
+          </button>
         </aside>
       </div>
 

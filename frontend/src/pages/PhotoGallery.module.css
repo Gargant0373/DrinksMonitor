@@ -1,0 +1,201 @@
+.page {
+  min-height: 100vh;
+  background: var(--bg, #0f172a);
+  color: var(--color-text, #f1f5f9);
+  display: flex;
+  flex-direction: column;
+}
+
+/* ── Header ── */
+.header {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  background: rgba(15 23 42 / 0.92);
+  backdrop-filter: blur(8px);
+  border-bottom: 1px solid var(--border, #1e293b);
+}
+
+.back {
+  background: none;
+  border: none;
+  color: var(--muted, #94a3b8);
+  font-size: 0.9rem;
+  cursor: pointer;
+  padding: 0.3rem 0.6rem;
+  border-radius: 6px;
+  transition: color 0.15s, background 0.15s;
+  white-space: nowrap;
+}
+.back:hover { color: #f1f5f9; background: rgba(255 255 255 / 0.06); }
+
+.title {
+  flex: 1;
+  font-size: 1.1rem;
+  font-weight: 700;
+  margin: 0;
+  white-space: nowrap;
+}
+
+.sortBtns { display: flex; gap: 0.4rem; }
+
+.sortBtn {
+  padding: 0.3rem 0.75rem;
+  border-radius: 20px;
+  border: 1px solid var(--border, #1e293b);
+  background: none;
+  color: var(--muted, #94a3b8);
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+.sortBtn:hover { background: rgba(255 255 255 / 0.06); color: #f1f5f9; }
+.sortActive { background: var(--primary, #f59e0b) !important; color: #000 !important; border-color: transparent !important; font-weight: 700; }
+
+/* ── Empty ── */
+.empty {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--muted, #94a3b8);
+  font-size: 1rem;
+}
+
+/* ── Masonry grid ── */
+.masonry {
+  padding: 0.75rem;
+  columns: 2;
+  column-gap: 8px;
+}
+
+@media (min-width: 600px) { .masonry { columns: 3; } }
+@media (min-width: 900px) { .masonry { columns: 4; } }
+
+/* ── Card ── */
+.card {
+  break-inside: avoid;
+  margin-bottom: 8px;
+  border-radius: 10px;
+  overflow: hidden;
+  position: relative;
+  cursor: pointer;
+  background: #111;
+  display: block;
+}
+
+/* Landscape: wider proportions → keep as-is */
+/* Portrait: taller → still break-inside handles it */
+
+.card:hover .cardOverlay { opacity: 1; }
+
+.thumb {
+  width: 100%;
+  display: block;
+  object-fit: cover;
+}
+
+/* Landscape images: fixed shorter aspect */
+.landscape .thumb { aspect-ratio: 4/3; }
+/* Portrait images: taller aspect */
+.portrait  .thumb { aspect-ratio: 3/4; }
+/* Square */
+.square    .thumb { aspect-ratio: 1; }
+
+.cardOverlay {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: linear-gradient(transparent, rgba(0 0 0 / 0.75));
+  padding: 1.5rem 0.6rem 0.5rem;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+}
+
+/* Always show on touch devices */
+@media (hover: none) { .cardOverlay { opacity: 1; } }
+
+.cardAuthor { font-size: 0.72rem; font-weight: 700; color: #fff; }
+.cardCaption { font-size: 0.65rem; color: rgba(255 255 255 / 0.82); font-style: italic; }
+.cardVotes { font-size: 0.65rem; color: #fda4af; font-weight: 700; }
+
+/* ── Lightbox ── */
+.lightbox {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  background: rgba(0 0 0 / 0.92);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 1rem;
+}
+
+.lbClose {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  background: rgba(255 255 255 / 0.12);
+  border: none;
+  color: #fff;
+  font-size: 1.2rem;
+  width: 2.2rem;
+  height: 2.2rem;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 101;
+}
+
+.lbPrev, .lbNext {
+  background: rgba(255 255 255 / 0.1);
+  border: none;
+  color: #fff;
+  font-size: 2rem;
+  padding: 0 0.75rem;
+  height: 5rem;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.15s;
+  flex-shrink: 0;
+}
+.lbPrev:hover, .lbNext:hover { background: rgba(255 255 255 / 0.2); }
+
+.lbContent {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  max-width: min(90vw, 700px);
+  max-height: 90vh;
+  gap: 0.6rem;
+}
+
+.lbImg {
+  max-width: 100%;
+  max-height: 78vh;
+  object-fit: contain;
+  border-radius: 10px;
+}
+
+.lbMeta {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.lbAuthor { font-weight: 700; color: #fff; font-size: 0.9rem; }
+.lbCaption { color: rgba(255 255 255 / 0.75); font-style: italic; font-size: 0.85rem; }
+.lbVotes { color: #fda4af; font-weight: 700; font-size: 0.85rem; }
