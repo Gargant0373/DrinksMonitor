@@ -34,7 +34,11 @@ def close_db(e=None) -> None:
 def init_db(app) -> None:
     """Create tables if they don't exist."""
     with app.app_context():
-        db = get_db()
-        with open(SCHEMA_PATH, "r") as f:
-            db.executescript(f.read())
-        db.commit()
+        db_path = app.config.get("DATABASE") or DB_PATH
+        conn = sqlite3.connect(db_path, detect_types=sqlite3.PARSE_DECLTYPES)
+        try:
+            with open(SCHEMA_PATH, "r") as f:
+                conn.executescript(f.read())
+            conn.commit()
+        finally:
+            conn.close()
