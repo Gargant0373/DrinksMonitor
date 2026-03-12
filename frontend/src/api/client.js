@@ -29,7 +29,8 @@ const put  = (path, body)  => request("PUT",    path, body);
 
 // ── Sessions ────────────────────────────────────────────────────────────────
 export const createSession  = (name)       => post("/sessions", { name });
-export const getSession     = (id)         => get(`/sessions/${id}`);
+export const listSessions   = ()            => get("/sessions");
+export const getSession     = (id)          => get(`/sessions/${id}`);
 export const endSession     = (id)         => post(`/sessions/${id}/end`);
 export const getSessionQRUrl = (id)        => `${BASE}/sessions/${id}/qr`;
 

@@ -1,13 +1,8 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { createSession } from "../api/client";
+import { createSession, listSessions } from "../api/client";
 import { useTitle } from "../hooks/useTitle";
 import styles from "./Home.module.css";
-
-function loadSessions() {
-  try { return JSON.parse(localStorage.getItem("dg_sessions") || "[]"); }
-  catch { return []; }
-}
 
 export default function Home() {
   useTitle(null);
@@ -15,7 +10,11 @@ export default function Home() {
   const [name, setName]         = useState("");
   const [loading, setLoading]   = useState(false);
   const [error, setError]       = useState("");
-  const [sessions, setSessions] = useState(loadSessions);
+  const [sessions, setSessions] = useState([]);
+
+  useEffect(() => {
+    listSessions().then(setSessions).catch(() => {});
+  }, []);
 
   async function handleCreate(e) {
     e.preventDefault();
@@ -24,10 +23,6 @@ export default function Home() {
     setError("");
     try {
       const { session_id } = await createSession(name.trim());
-      const updated = [{ id: session_id, name: name.trim(), created_at: new Date().toISOString() }, ...sessions];
-      const trimmed = updated.slice(0, 10);
-      localStorage.setItem("dg_sessions", JSON.stringify(trimmed));
-      setSessions(trimmed);
       navigate(`/session/${session_id}/setup`);
     } catch (err) {
       setError(err.message);
@@ -66,7 +61,12 @@ export default function Home() {
                 className={styles.recentBtn}
                 onClick={() => navigate(`/session/${s.id}/setup`)}
               >
-                <span className={styles.recentName}>{s.name}</span>
+                <span className={styles.recentName}>
+                  {s.name}
+                  {s.status === "active"
+                    ? <span className={styles.badgeActive}>live</span>
+                    : <span className={styles.badgeEnded}>ended</span>}
+                </span>
                 <span className={styles.recentDate}>{new Date(s.created_at).toLocaleDateString()}</span>
               </button>
               <button

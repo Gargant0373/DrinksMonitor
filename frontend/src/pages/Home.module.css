@@ -63,8 +63,11 @@
 }
 .recentBtn:hover { background: var(--surface-hover, #1e293b); }
 
-.recentName { font-size: 0.9rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.recentName { font-size: 0.9rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: flex; align-items: center; gap: 0.4rem; }
 .recentDate { font-size: 0.75rem; color: var(--muted); white-space: nowrap; flex-shrink: 0; }
+
+.badgeActive { font-size: 0.65rem; font-weight: 700; background: #22c55e; color: #000; padding: 0.1rem 0.4rem; border-radius: 99px; }
+.badgeEnded  { font-size: 0.65rem; font-weight: 700; background: var(--muted); color: #000; padding: 0.1rem 0.4rem; border-radius: 99px; }
 
 .recentMonitor {
   padding: 0.5rem 0.65rem;

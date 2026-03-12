@@ -61,6 +61,15 @@ def create_session():
     return jsonify({"session_id": session_id}), 201
 
 
+@sessions_bp.get("/sessions")
+def list_sessions():
+    db = get_db()
+    rows = db.execute(
+        "SELECT id, name, status, created_at FROM sessions ORDER BY created_at DESC LIMIT 20"
+    ).fetchall()
+    return jsonify([dict(r) for r in rows])
+
+
 @sessions_bp.get("/sessions/<session_id>")
 def get_session(session_id: str):
     db = get_db()
